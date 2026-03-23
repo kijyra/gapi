@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp API Interface</title>
+    <!-- Подключаем Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <style>
+        body {
+            background-color: #fcfcfc;
+            padding-top: 60px;
+            padding-bottom: 60px;
+        }
+        .container-fluid { max-width: 1400px; }
+        .btn-action { width: 100%; margin-top: 10px; margin-bottom: 25px; border-color: #ccc; color: #333; }
+        .response-container {
+            position: sticky;
+            top: 60px;
+        }
+        .response-box {
+            min-height: 500px;
+            border: 1px solid #dee2e6;
+            padding: 20px;
+            background: #fff;
+            font-family: 'Courier New', monospace;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            white-space: pre-wrap;
+        }
+        .section-label {
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: #555;
+            height: 38px;
+            display: flex;
+            align-items: center;
+        }
+    </style>
+</head>
+<body class="py-5">
+
+<div class="container-fluid px-4">
+    <div class="row g-5">
+        <!-- ЛЕВАЯ КОЛОНКА -->
+        <div class="col-md-5">
+            <input type="text" id="idInstance" class="form-control" placeholder="idInstance">
+            <input type="password" id="apiToken" class="form-control" placeholder="ApiTokenInstance">
+            <button class="btn btn-outline-secondary btn-action" onclick="callApi('getSettings')">getSettings</button>
+            <button class="btn btn-outline-secondary btn-action" onclick="callApi('getStateInstance')">getStateInstance</button>
+
+            <hr>
+
+            <div class="mb-2">
+                <input type="text" id="chatIdMsg" class="form-control mb-2" placeholder="Введите номер телефона">
+                <textarea id="messageText" class="form-control" rows="3" placeholder="Введите текст сообщения"></textarea>
+            </div>
+            <button class="btn btn-outline-secondary btn-action" onclick="sendMessage()">sendMessage</button>
+
+            <hr>
+
+            <div class="mb-2">
+                <input type="text" id="chatIdFile" class="form-control mb-2" placeholder="Введите номер телефона">
+                <input type="text" id="fileUrl" class="form-control" placeholder="https://url-to-file.png">
+            </div>
+            <button class="btn btn-outline-secondary btn-action" onclick="sendFileByUrl()">sendFileByUrl</button>
+        </div>
+
+        <!-- ПРАВАЯ КОЛОНКА -->
+        <div class="col-md-7">
+            <div class="response-container">
+                <div class="section-label">Ответ:</div>
+                <div class="response-box" id="responseOutput">Тут появится ответ от API...</div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    async function callApi(method) {
+        const id = document.getElementById('idInstance').value.trim();
+        const token = document.getElementById('apiToken').value.trim();
+        if (!id || !token) {
+            displayResponse({ error: "Пожалуйста, заполните idInstance и ApiTokenInstance" });
+            return;
+        }
+        const url = `/api/waInstance${id}/${method}/${token}`;
+        showLoading();
+        try {
+            const response = await fetch(url);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            displayResponse(data);
+        } catch (error) {
+            displayResponse({ error: error.message });
+        }
+    }
+
+    async function sendMessage() {
+        const id = document.getElementById('idInstance').value.trim();
+        const token = document.getElementById('apiToken').value.trim();
+        let chatId = document.getElementById('chatIdMsg').value.trim();
+        const message = document.getElementById('messageText').value.trim();
+
+        if (!id || !token) {
+            displayResponse({ error: "Заполните idInstance и ApiTokenInstance" });
+            return;
+        }
+        if (!chatId) {
+            displayResponse({ error: "Введите номер телефона" });
+            return;
+        }
+        if (!message) {
+            displayResponse({ error: "Введите текст сообщения" });
+            return;
+        }
+
+        if (!chatId.includes('@c.us')) chatId += '@c.us';
+
+        const url = `/api/waInstance${id}/sendMessage/${token}`;
+        const payload = { chatId, message };
+        await postData(url, payload);
+    }
+
+    async function sendFileByUrl() {
+        const id = document.getElementById('idInstance').value.trim();
+        const token = document.getElementById('apiToken').value.trim();
+        let chatId = document.getElementById('chatIdFile').value.trim();
+        const urlFile = document.getElementById('fileUrl').value.trim();
+
+        if (!id || !token) {
+            displayResponse({ error: "Заполните idInstance и ApiTokenInstance" });
+            return;
+        }
+        if (!chatId) {
+            displayResponse({ error: "Введите номер телефона" });
+            return;
+        }
+        if (!urlFile) {
+            displayResponse({ error: "Введите URL файла" });
+            return;
+        }
+
+        if (!chatId.includes('@c.us')) chatId += '@c.us';
+        const fileName = urlFile.split('/').pop() || "file";
+
+        const url = `/api/waInstance${id}/sendFileByUrl/${token}`;
+        const payload = { chatId, urlFile, fileName };
+        await postData(url, payload);
+    }
+
+    async function postData(url, payload) {
+        showLoading();
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            displayResponse(data);
+        } catch (error) {
+            displayResponse({ error: error.message });
+        }
+    }
+
+    function displayResponse(data) {
+        document.getElementById('responseOutput').innerText = JSON.stringify(data, null, 2);
+    }
+
+    function showLoading() {
+        document.getElementById('responseOutput').innerText = "Загрузка...";
+    }
+</script>
+</body>
+</html>

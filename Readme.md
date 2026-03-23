@@ -46,4 +46,4 @@
 ## 🔗 Ссылки
 * Демо-страница: http://217.114.0.78:8080
 * Репозиторий GitHub: https://github.com/kijyra/gapi
-* Видео-презентация: [Ссылка на видео/Google Drive]()
+* Видео-презентация: [Ссылка на видео/Google Drive](https://drive.google.com/file/d/16j3T7e68dXMOFmLq5S_xT_g0P04ZWtvu/view?usp=sharing)

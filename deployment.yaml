@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: green-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: green-api
+  template:
+    metadata:
+      labels:
+        app: green-api
+    spec:
+      containers:
+      - name: app
+        image: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+        ports:
+        - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: green-api
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    nodePort: 30080
+  selector:
+    app: green-api

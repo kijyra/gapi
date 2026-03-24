@@ -1,0 +1,35 @@
+stages:
+  - build
+  - deploy
+
+variables:
+  KANIKO_IMAGE: gcr.io/kaniko-project/executor:latest
+
+build:
+  stage: build
+  image:
+    name: ${KANIKO_IMAGE}
+    entrypoint: [""]
+  script:
+    - |
+      /kaniko/executor \
+        --context "${CI_PROJECT_DIR}" \
+        --dockerfile "${CI_PROJECT_DIR}/Dockerfile" \
+        --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}" \
+        --cache=true
+  only:
+    - main
+  tags:
+    - k3s
+
+deploy:
+  stage: deploy
+  image: bitnami/kubectl:latest
+  script:
+    - sed -i "s|\$CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA|${CI_REGISTRY_IMAGE}:${CI_COMMIT_SHORT_SHA}|g" deployment.yaml
+    - kubectl apply -f deployment.yaml
+    - kubectl rollout status deployment/green-api --timeout=5m
+  only:
+    - main
+  tags:
+    - k3s-runner

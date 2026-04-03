@@ -72,8 +72,20 @@ jobs:
             echo "Deploying to $NEW"
             docker compose up -d $NEW
 
-            curl --retry 10 --retry-delay 3 --retry-connrefused \
-                -f http://localhost:80
-            echo "New version healthy"
+            if curl --retry 10 --retry-delay 3 --fail \
+                http://localhost:8080/ | grep -q "Welcome to nginx"; then
+                echo "New version healthy"
+
+                if [ ! -z "$OLD" ] && docker ps --format '{{.Names}}' | grep -q "$OLD"; then
+                    echo "Stopping old container: $OLD"
+                    docker compose stop $OLD
+                fi
+            else
+                echo "New version failed health check!"
+                echo "Rolling back - removing $NEW"
+                docker compose stop $NEW
+                docker compose rm -f $NEW
+                exit 1
+            fi
 
             docker image prune -a --filter "until=72h" -f

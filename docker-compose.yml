@@ -1,7 +1,22 @@
 services:
-  gapi:
-    container_name: Green-API
-    image: ${IMAGE}
+  haproxy:
+    image: haproxy:2.9-alpine
+    container_name: haproxy
     ports:
       - "8080:80"
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro
+    depends_on:
+      - gapi_blue
+      - gapi_green
+    restart: unless-stopped
+
+  gapi_blue:
+    image: ${IMAGE}
+    container_name: gapi_blue
+    restart: unless-stopped
+
+  gapi_green:
+    image: ${IMAGE}
+    container_name: gapi_green
     restart: unless-stopped

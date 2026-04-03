@@ -61,10 +61,24 @@ jobs:
 
             echo "IMAGE=$IMAGE" > .env
 
-            docker-compose pull
-            docker-compose up -d
+            docker compose pull
 
-            sleep 5
-            curl -f http://localhost:8080 || exit 1
+            if docker ps --format '{{.Names}}' | grep -q gapi_blue; then
+              NEW=gapi_green
+              OLD=gapi_blue
+            else
+              NEW=gapi_blue
+              OLD=gapi_green
+            fi
+
+            echo "Deploying to $NEW"
+            docker compose up -d $NEW
+
+            curl --retry 10 --retry-delay 3 --retry-connrefused \
+                -f http://localhost:8080
+            echo "New version healthy"
+
+            docker stop $OLD || true
+            docker rm $OLD || true
 
             docker image prune -a --filter "until=72h" -f

@@ -72,8 +72,8 @@ jobs:
             echo "Deploying to $NEW"
             docker compose up -d $NEW
 
-            if curl --retry 10 --retry-delay 3 --fail \
-                http://localhost:8080/ | grep -q "Welcome to nginx"; then
+            if curl --retry 10 --retry-delay 3 --fail --silent --output /dev/null \
+                http://localhost:8080/; then
                 echo "New version healthy"
 
                 if [ ! -z "$OLD" ] && docker ps --format '{{.Names}}' | grep -q "$OLD"; then

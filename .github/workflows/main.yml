@@ -58,7 +58,7 @@ jobs:
             IMAGE=${{ secrets.DOCKER_USERNAME }}/gapi:${{ github.ref_name }}
 
             cd ~/gapi
-
+            git pull
             echo "IMAGE=$IMAGE" > .env
 
             docker compose pull

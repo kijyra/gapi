@@ -48,14 +48,14 @@ services:
       - gapi_network
 
   gapi_blue:
-    image: ${IMAGE}
+    image: kijyra/gapi
     container_name: gapi_blue
     restart: unless-stopped
     networks:
       - gapi_network
 
   gapi_green:
-    image: ${IMAGE}
+    image: kijyra/gapi
     container_name: gapi_green
     restart: unless-stopped
     networks:

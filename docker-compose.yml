@@ -10,13 +10,23 @@ services:
       - gapi_blue
       - gapi_green
     restart: unless-stopped
+    networks:
+      - gapi_network
 
   gapi_blue:
     image: ${IMAGE}
     container_name: gapi_blue
     restart: unless-stopped
+    networks:
+      - gapi_network
 
   gapi_green:
     image: ${IMAGE}
     container_name: gapi_green
     restart: unless-stopped
+    networks:
+      - gapi_network
+
+networks:
+  gapi_network:
+    driver: bridge

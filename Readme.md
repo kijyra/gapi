@@ -44,23 +44,34 @@ services:
       - gapi_blue
       - gapi_green
     restart: unless-stopped
+    networks:
+      - gapi_network
 
   gapi_blue:
-    image: kijyra/gapi
+    image: ${IMAGE}
     container_name: gapi_blue
     restart: unless-stopped
+    networks:
+      - gapi_network
 
   gapi_green:
-    image: kijyra/gapi
+    image: ${IMAGE}
     container_name: gapi_green
     restart: unless-stopped
+    networks:
+      - gapi_network
 
+networks:
+  gapi_network:
+    driver: bridge
 ```
 2. Создать `haproxy.cfg`
 ```cfg
 global
     daemon
     maxconn 99
+    ssl-default-bind-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
+    ssl-default-server-ciphers ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256
 
 defaults
     mode http
@@ -90,7 +101,7 @@ backend green_api
     http-response set-header Access-Control-Allow-Methods "GET, POST, OPTIONS"
     http-response set-header Access-Control-Allow-Headers "Content-Type"
 
-    server greenapi api.green-api.com:443 ssl verify required
+    server greenapi 1105.api.green-api.com:443 ssl verify required ca-file /etc/ssl/certs/ca-certificates.crt
 
 ```
 3. Запуск:

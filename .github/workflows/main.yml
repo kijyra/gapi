@@ -78,7 +78,4 @@ jobs:
                 -f http://localhost:80
             echo "New version healthy"
 
-#            docker stop $OLD || true
-#            docker rm $OLD || true
-
             docker image prune -a --filter "until=72h" -f

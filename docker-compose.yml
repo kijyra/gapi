@@ -1,0 +1,7 @@
+services:
+  gapi:
+    container_name: Green-API
+    image: ${IMAGE}
+    ports:
+      - "8080:80"
+    restart: unless-stopped

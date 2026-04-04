@@ -101,7 +101,7 @@ backend green_api
     http-response set-header Access-Control-Allow-Methods "GET, POST, OPTIONS"
     http-response set-header Access-Control-Allow-Headers "Content-Type"
 
-    server greenapi 1105.api.green-api.com:443 ssl verify required ca-file /etc/ssl/certs/ca-certificates.crt
+    server greenapi api.green-api.com:443 ssl verify required ca-file /etc/ssl/certs/ca-certificates.crt
 
 ```
 3. Запуск:
@@ -117,8 +117,6 @@ docker-compose up -d
 3. **Rollout:** Запуск нового контейнера, проверка его готовности и удаление устаревшей версии.
 4. **Cleanup:** Автоматическая очистка неиспользуемых образов (docker image prune).
 
-При пуше в ветку `main` пересобирается контейнер в Docker Hub.
-
 ### Особенности конфигурации:
 * **High Availability:** HAProxy выполняет роль входной точки, проверяя доступность backend-контейнеров (health checks).
 * **Zero-Downtime:** Обновление приложения происходит путем запуска новой версии параллельно со старой и плавным переключением трафика.
@@ -129,4 +127,4 @@ docker-compose up -d
 ## 🔗 Ссылки
 * Демо-страница: http://217.114.0.78:8080
 * Репозиторий GitHub: https://github.com/kijyra/gapi
-* Видео-презентация: [Ссылка на видео/Google Drive](https://drive.google.com/file/d/16j3T7e68dXMOFmLq5S_xT_g0P04ZWtvu/view?usp=sharing)
+* Видео-презентация: [Ссылка на видео/Google Drive](https://drive.google.com/file/d/none/view?usp=sharing)
